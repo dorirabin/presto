@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableMap;
 import io.airlift.json.JsonCodec;
 import org.testng.annotations.Test;
 
+import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Properties;
 
@@ -53,7 +54,8 @@ public class TestHiveSplit
                 OptionalInt.empty(),
                 true,
                 TupleDomain.all(),
-                ImmutableMap.of(1, HIVE_STRING));
+                ImmutableMap.of(1, HIVE_STRING),
+                Optional.empty());
 
         String json = codec.toJson(expected);
         HiveSplit actual = codec.fromJson(json);

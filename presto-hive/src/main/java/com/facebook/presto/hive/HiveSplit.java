@@ -16,6 +16,7 @@ package com.facebook.presto.hive;
 import com.facebook.presto.spi.ConnectorSplit;
 import com.facebook.presto.spi.HostAddress;
 import com.facebook.presto.spi.predicate.TupleDomain;
+import com.facebook.presto.spi.type.NestedField;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
@@ -23,6 +24,7 @@ import com.google.common.collect.ImmutableMap;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Properties;
 
@@ -47,6 +49,7 @@ public class HiveSplit
     private final OptionalInt bucketNumber;
     private final boolean forceLocalScheduling;
     private final Map<Integer, HiveType> columnCoercions;
+    private final Optional<Map<String, NestedField>> nestedFields;
 
     @JsonCreator
     public HiveSplit(
@@ -63,7 +66,8 @@ public class HiveSplit
             @JsonProperty("bucketNumber") OptionalInt bucketNumber,
             @JsonProperty("forceLocalScheduling") boolean forceLocalScheduling,
             @JsonProperty("effectivePredicate") TupleDomain<HiveColumnHandle> effectivePredicate,
-            @JsonProperty("columnCoercions") Map<Integer, HiveType> columnCoercions)
+            @JsonProperty("columnCoercions") Map<Integer, HiveType> columnCoercions,
+            @JsonProperty("nestedFields") Optional<Map<String, NestedField>> nestedFields)
     {
         requireNonNull(clientId, "clientId is null");
         checkArgument(start >= 0, "start must be positive");
@@ -93,6 +97,7 @@ public class HiveSplit
         this.forceLocalScheduling = forceLocalScheduling;
         this.effectivePredicate = effectivePredicate;
         this.columnCoercions = columnCoercions;
+        this.nestedFields = nestedFields;
     }
 
     @JsonProperty
@@ -180,6 +185,12 @@ public class HiveSplit
         return columnCoercions;
     }
 
+    @JsonProperty
+    public Optional<Map<String, NestedField>> getNestedFields()
+    {
+        return nestedFields;
+    }
+
     @Override
     public boolean isRemotelyAccessible()
     {
@@ -198,6 +209,7 @@ public class HiveSplit
                 .put("table", table)
                 .put("forceLocalScheduling", forceLocalScheduling)
                 .put("partitionName", partitionName)
+                .put("nestedFields", nestedFields)
                 .build();
     }
 
@@ -209,6 +221,7 @@ public class HiveSplit
                 .addValue(start)
                 .addValue(length)
                 .addValue(effectivePredicate)
+                .addValue(nestedFields)
                 .toString();
     }
 }

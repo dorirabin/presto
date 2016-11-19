@@ -26,6 +26,7 @@ import com.facebook.presto.spi.SchemaTableName;
 import com.facebook.presto.spi.TableNotFoundException;
 import com.facebook.presto.spi.connector.ConnectorSplitManager;
 import com.facebook.presto.spi.connector.ConnectorTransactionHandle;
+import com.facebook.presto.spi.type.NestedField;
 import com.google.common.collect.AbstractIterator;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -137,7 +138,7 @@ public class HiveSplitManager
     }
 
     @Override
-    public ConnectorSplitSource getSplits(ConnectorTransactionHandle transaction, ConnectorSession session, ConnectorTableLayoutHandle layoutHandle)
+    public ConnectorSplitSource getSplits(ConnectorTransactionHandle transaction, ConnectorSession session, ConnectorTableLayoutHandle layoutHandle, Optional<Map<String, NestedField>> nestedFields)
     {
         HiveTableLayoutHandle layout = (HiveTableLayoutHandle) layoutHandle;
 
@@ -174,7 +175,8 @@ public class HiveSplitManager
                 executor,
                 maxPartitionBatchSize,
                 maxInitialSplits,
-                recursiveDfsWalkerEnabled);
+                recursiveDfsWalkerEnabled,
+                nestedFields);
 
         HiveSplitSource splitSource = new HiveSplitSource(maxOutstandingSplits, hiveSplitLoader, executor);
         hiveSplitLoader.start(splitSource);

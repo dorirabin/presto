@@ -142,7 +142,7 @@ public class DistributedExecutionPlanner
         public Map<PlanNodeId, SplitSource> visitTableScan(TableScanNode node, Void context)
         {
             // get dataSource for table
-            SplitSource splitSource = splitManager.getSplits(session, node.getLayout().get());
+            SplitSource splitSource = splitManager.getSplits(session, node.getLayout().get(), node.getNestedFields());
 
             splitSources.add(splitSource);
 

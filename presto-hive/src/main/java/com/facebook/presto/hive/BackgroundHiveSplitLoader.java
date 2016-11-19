@@ -24,6 +24,7 @@ import com.facebook.presto.spi.HostAddress;
 import com.facebook.presto.spi.PrestoException;
 import com.facebook.presto.spi.StandardErrorCode;
 import com.facebook.presto.spi.predicate.TupleDomain;
+import com.facebook.presto.spi.type.NestedField;
 import com.google.common.base.Throwables;
 import com.google.common.collect.AbstractIterator;
 import com.google.common.collect.ImmutableList;
@@ -107,6 +108,7 @@ public class BackgroundHiveSplitLoader
     private final ConcurrentLazyQueue<HivePartitionMetadata> partitions;
     private final Deque<HiveFileIterator> fileIterators = new ConcurrentLinkedDeque<>();
     private final AtomicInteger remainingInitialSplits;
+    private final Optional<Map<String, NestedField>> nestedFields;
 
     // Purpose of this lock:
     // * When write lock is acquired, except the holder, no one can do any of the following:
@@ -137,7 +139,8 @@ public class BackgroundHiveSplitLoader
             Executor executor,
             int maxPartitionBatchSize,
             int maxInitialSplits,
-            boolean recursiveDirWalkerEnabled)
+            boolean recursiveDirWalkerEnabled,
+            Optional<Map<String, NestedField>> nestedFields)
     {
         this.connectorId = connectorId;
         this.table = table;
@@ -152,6 +155,7 @@ public class BackgroundHiveSplitLoader
         this.maxInitialSplitSize = getMaxInitialSplitSize(session);
         this.remainingInitialSplits = new AtomicInteger(maxInitialSplits);
         this.recursiveDirWalkerEnabled = recursiveDirWalkerEnabled;
+        this.nestedFields = nestedFields;
         this.executor = executor;
         this.partitions = new ConcurrentLazyQueue<>(partitions);
     }
@@ -555,7 +559,8 @@ public class BackgroundHiveSplitLoader
                             bucketNumber,
                             forceLocalScheduling && hasRealAddress(addresses),
                             effectivePredicate,
-                            columnCoercions);
+                            columnCoercions,
+                            nestedFields);
 
                     chunkOffset += chunkLength;
 
@@ -590,7 +595,8 @@ public class BackgroundHiveSplitLoader
                     bucketNumber,
                     forceLocalScheduling && hasRealAddress(addresses),
                     effectivePredicate,
-                    columnCoercions));
+                    columnCoercions,
+                    nestedFields));
         }
     }
 

@@ -16,10 +16,14 @@ package com.facebook.presto.spi.connector;
 import com.facebook.presto.spi.ConnectorSession;
 import com.facebook.presto.spi.ConnectorSplitSource;
 import com.facebook.presto.spi.ConnectorTableLayoutHandle;
+import com.facebook.presto.spi.type.NestedField;
+
+import java.util.Map;
+import java.util.Optional;
 
 public interface ConnectorSplitManager
 {
-    default ConnectorSplitSource getSplits(ConnectorTransactionHandle transactionHandle, ConnectorSession session, ConnectorTableLayoutHandle layout)
+    default ConnectorSplitSource getSplits(ConnectorTransactionHandle transactionHandle, ConnectorSession session, ConnectorTableLayoutHandle layout, Optional<Map<String, NestedField>> nestedFields)
     {
         throw new UnsupportedOperationException("not yet implemented");
     }

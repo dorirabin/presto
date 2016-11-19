@@ -21,6 +21,7 @@ import com.facebook.presto.spi.FixedSplitSource;
 import com.facebook.presto.spi.HostAddress;
 import com.facebook.presto.spi.connector.ConnectorSplitManager;
 import com.facebook.presto.spi.connector.ConnectorTransactionHandle;
+import com.facebook.presto.spi.type.NestedField;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import redis.clients.jedis.Jedis;
@@ -30,6 +31,8 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static com.facebook.presto.redis.RedisHandleResolver.convertLayout;
 import static com.google.common.base.Preconditions.checkState;
@@ -60,7 +63,7 @@ public class RedisSplitManager
     }
 
     @Override
-    public ConnectorSplitSource getSplits(ConnectorTransactionHandle transaction, ConnectorSession session, ConnectorTableLayoutHandle layout)
+    public ConnectorSplitSource getSplits(ConnectorTransactionHandle transaction, ConnectorSession session, ConnectorTableLayoutHandle layout, Optional<Map<String, NestedField>> nestedFields)
     {
         RedisTableHandle redisTableHandle = convertLayout(layout).getTable();
 
