@@ -22,6 +22,7 @@ import com.facebook.presto.spi.RecordPageSource;
 import com.facebook.presto.spi.connector.ConnectorPageSourceProvider;
 import com.facebook.presto.spi.connector.ConnectorTransactionHandle;
 import com.facebook.presto.spi.predicate.TupleDomain;
+import com.facebook.presto.spi.type.NestedField;
 import com.facebook.presto.spi.type.Type;
 import com.facebook.presto.spi.type.TypeManager;
 import com.google.common.collect.ImmutableList;
@@ -100,7 +101,8 @@ public class HivePageSourceProvider
                 hiveSplit.getPartitionKeys(),
                 hiveStorageTimeZone,
                 typeManager,
-                hiveSplit.getColumnCoercions());
+                hiveSplit.getColumnCoercions(),
+                hiveSplit.getNestedFields());
         if (pageSource.isPresent()) {
             return pageSource.get();
         }
@@ -123,7 +125,8 @@ public class HivePageSourceProvider
             List<HivePartitionKey> partitionKeys,
             DateTimeZone hiveStorageTimeZone,
             TypeManager typeManager,
-            Map<Integer, HiveType> columnCoercions)
+            Map<Integer, HiveType> columnCoercions,
+            Optional<Map<String, NestedField>> nestedFields)
     {
         List<ColumnMapping> columnMappings = ColumnMapping.buildColumnMappings(partitionKeys, hiveColumns, columnCoercions, path, bucketNumber);
         List<ColumnMapping> regularColumnMappings = ColumnMapping.extractRegularColumnMappings(columnMappings);
@@ -138,7 +141,8 @@ public class HivePageSourceProvider
                     schema,
                     extractRegularColumnHandles(regularColumnMappings, true),
                     effectivePredicate,
-                    hiveStorageTimeZone
+                    hiveStorageTimeZone,
+                    nestedFields
             );
             if (pageSource.isPresent()) {
                 return Optional.of(
@@ -165,7 +169,8 @@ public class HivePageSourceProvider
                     extractRegularColumnHandles(regularColumnMappings, doCoercion),
                     effectivePredicate,
                     hiveStorageTimeZone,
-                    typeManager);
+                    typeManager,
+                    nestedFields);
 
             if (cursor.isPresent()) {
                 RecordCursor delegate = cursor.get();

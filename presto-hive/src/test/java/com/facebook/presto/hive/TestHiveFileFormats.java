@@ -843,7 +843,8 @@ public class TestHiveFileFormats
                 partitionKeys,
                 DateTimeZone.getDefault(),
                 TYPE_MANAGER,
-                ImmutableMap.of());
+                ImmutableMap.of(),
+                Optional.empty());
 
         RecordCursor cursor = ((RecordPageSource) pageSource.get()).getCursor();
 
@@ -887,7 +888,8 @@ public class TestHiveFileFormats
                 partitionKeys,
                 DateTimeZone.getDefault(),
                 TYPE_MANAGER,
-                ImmutableMap.of());
+                ImmutableMap.of(),
+                Optional.empty());
 
         assertTrue(pageSource.isPresent());
 

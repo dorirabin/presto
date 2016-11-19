@@ -24,6 +24,7 @@ import com.facebook.presto.spi.block.LazyBlock;
 import com.facebook.presto.spi.block.LazyBlockLoader;
 import com.facebook.presto.spi.block.RunLengthEncodedBlock;
 import com.facebook.presto.spi.predicate.TupleDomain;
+import com.facebook.presto.spi.type.NestedField;
 import com.facebook.presto.spi.type.Type;
 import com.facebook.presto.spi.type.TypeManager;
 import com.google.common.base.Throwables;
@@ -34,14 +35,15 @@ import parquet.schema.MessageType;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 
 import static com.facebook.presto.hive.HiveColumnHandle.ColumnType.REGULAR;
 import static com.facebook.presto.hive.HiveErrorCode.HIVE_CURSOR_ERROR;
+import static com.facebook.presto.hive.parquet.ParquetTypeUtils.getColumnType;
 import static com.facebook.presto.hive.parquet.ParquetTypeUtils.getDescriptor;
 import static com.facebook.presto.hive.parquet.ParquetTypeUtils.getFieldIndex;
-import static com.facebook.presto.hive.parquet.ParquetTypeUtils.getParquetType;
 import static com.facebook.presto.spi.type.StandardTypes.ARRAY;
 import static com.facebook.presto.spi.type.StandardTypes.MAP;
 import static com.facebook.presto.spi.type.StandardTypes.ROW;
@@ -84,7 +86,8 @@ public class ParquetPageSource
             TupleDomain<HiveColumnHandle> effectivePredicate,
             TypeManager typeManager,
             boolean useParquetColumnNames,
-            AggregatedMemoryContext systemMemoryContext)
+            AggregatedMemoryContext systemMemoryContext,
+            Optional<Map<String, NestedField>> nestedFields)
     {
         checkArgument(totalBytes >= 0, "totalBytes is negative");
         requireNonNull(splitSchema, "splitSchema is null");
@@ -116,7 +119,7 @@ public class ParquetPageSource
 
             hiveColumnIndexes[columnIndex] = column.getHiveColumnIndex();
 
-            if (getParquetType(column, fileSchema, useParquetColumnNames) == null) {
+            if (getColumnType(column, fileSchema, useParquetColumnNames, nestedFields) == null) {
                 constantBlocks[columnIndex] = RunLengthEncodedBlock.create(type, null, MAX_VECTOR_LENGTH);
             }
         }

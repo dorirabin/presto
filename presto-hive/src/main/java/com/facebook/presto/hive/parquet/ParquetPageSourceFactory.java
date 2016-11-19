@@ -25,6 +25,7 @@ import com.facebook.presto.spi.ConnectorPageSource;
 import com.facebook.presto.spi.ConnectorSession;
 import com.facebook.presto.spi.PrestoException;
 import com.facebook.presto.spi.predicate.TupleDomain;
+import com.facebook.presto.spi.type.NestedField;
 import com.facebook.presto.spi.type.TypeManager;
 import com.google.common.collect.ImmutableSet;
 import org.apache.hadoop.conf.Configuration;
@@ -42,6 +43,7 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
@@ -54,7 +56,7 @@ import static com.facebook.presto.hive.HiveSessionProperties.isParquetOptimizedR
 import static com.facebook.presto.hive.HiveSessionProperties.isParquetPredicatePushdownEnabled;
 import static com.facebook.presto.hive.HiveUtil.getDeserializerClassName;
 import static com.facebook.presto.hive.parquet.HdfsParquetDataSource.buildHdfsParquetDataSource;
-import static com.facebook.presto.hive.parquet.ParquetTypeUtils.getParquetType;
+import static com.facebook.presto.hive.parquet.ParquetTypeUtils.getColumnType;
 import static com.facebook.presto.hive.parquet.predicate.ParquetPredicateUtils.buildParquetPredicate;
 import static com.facebook.presto.hive.parquet.predicate.ParquetPredicateUtils.getParquetTupleDomain;
 import static com.facebook.presto.hive.parquet.predicate.ParquetPredicateUtils.predicateMatches;
@@ -97,7 +99,8 @@ public class ParquetPageSourceFactory
             Properties schema,
             List<HiveColumnHandle> columns,
             TupleDomain<HiveColumnHandle> effectivePredicate,
-            DateTimeZone hiveStorageTimeZone)
+            DateTimeZone hiveStorageTimeZone,
+            Optional<Map<String, NestedField>> nestedFields)
     {
         if (!isParquetOptimizedReaderEnabled(session)) {
             return Optional.empty();
@@ -119,7 +122,8 @@ public class ParquetPageSourceFactory
                 useParquetColumnNames,
                 typeManager,
                 isParquetPredicatePushdownEnabled(session),
-                effectivePredicate));
+                effectivePredicate,
+                nestedFields));
     }
 
     public static ParquetPageSource createParquetPageSource(
@@ -134,7 +138,8 @@ public class ParquetPageSourceFactory
             boolean useParquetColumnNames,
             TypeManager typeManager,
             boolean predicatePushdownEnabled,
-            TupleDomain<HiveColumnHandle> effectivePredicate)
+            TupleDomain<HiveColumnHandle> effectivePredicate,
+            Optional<Map<String, NestedField>> nestedFields)
     {
         AggregatedMemoryContext systemMemoryContext = new AggregatedMemoryContext();
 
@@ -148,7 +153,7 @@ public class ParquetPageSourceFactory
 
             List<parquet.schema.Type> fields = columns.stream()
                     .filter(column -> column.getColumnType() == REGULAR)
-                    .map(column -> getParquetType(column, fileSchema, useParquetColumnNames))
+                    .map(column -> getColumnType(column, fileSchema, useParquetColumnNames, nestedFields))
                     .filter(Objects::nonNull)
                     .collect(toList());
 
@@ -190,7 +195,8 @@ public class ParquetPageSourceFactory
                     effectivePredicate,
                     typeManager,
                     useParquetColumnNames,
-                    systemMemoryContext);
+                    systemMemoryContext,
+                    nestedFields);
         }
         catch (Exception e) {
             try {
