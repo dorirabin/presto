@@ -148,7 +148,8 @@ public class DesugaringOptimizer
                     node.getAssignments(),
                     node.getLayout(),
                     node.getCurrentConstraint(),
-                    originalConstraint);
+                    originalConstraint,
+                    node.getNestedFields());
         }
 
         @Override

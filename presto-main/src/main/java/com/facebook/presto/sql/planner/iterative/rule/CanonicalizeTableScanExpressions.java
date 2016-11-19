@@ -60,7 +60,8 @@ public class CanonicalizeTableScanExpressions
                 tableScanNode.getAssignments(),
                 tableScanNode.getLayout(),
                 tableScanNode.getCurrentConstraint(),
-                originalConstraint);
+                originalConstraint,
+                Optional.empty());
 
         return Optional.of(replacement);
     }

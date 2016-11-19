@@ -273,7 +273,8 @@ public class PlanBuilder
                 assignments,
                 Optional.empty(),
                 TupleDomain.all(),
-                originalConstraint
+                originalConstraint,
+                Optional.empty()
         );
     }
 

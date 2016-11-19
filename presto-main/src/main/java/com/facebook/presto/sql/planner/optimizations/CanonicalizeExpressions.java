@@ -126,7 +126,8 @@ public class CanonicalizeExpressions
                     node.getAssignments(),
                     node.getLayout(),
                     node.getCurrentConstraint(),
-                    originalConstraint);
+                    originalConstraint,
+                    node.getNestedFields());
         }
     }
 

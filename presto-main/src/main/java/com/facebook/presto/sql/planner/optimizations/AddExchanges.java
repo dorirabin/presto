@@ -616,7 +616,8 @@ public class AddExchanges
                                 node.getAssignments(),
                                 Optional.of(layout.getLayout().getHandle()),
                                 simplifiedConstraint.intersect(layout.getLayout().getPredicate()),
-                                Optional.ofNullable(node.getOriginalConstraint()).orElse(predicate));
+                                Optional.ofNullable(node.getOriginalConstraint()).orElse(predicate),
+                                node.getNestedFields());
 
                         PlanWithProperties result = new PlanWithProperties(tableScan, deriveProperties(tableScan, ImmutableList.of()));
 

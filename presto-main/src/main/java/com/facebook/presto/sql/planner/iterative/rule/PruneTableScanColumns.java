@@ -69,7 +69,8 @@ public class PruneTableScanColumns
                                 filterKeys(child.getAssignments(), dependencies.get()::contains),
                                 child.getLayout(),
                                 child.getCurrentConstraint(),
-                                child.getOriginalConstraint()),
+                                child.getOriginalConstraint(),
+                                Optional.empty()),
                         parent.getAssignments()));
     }
 }

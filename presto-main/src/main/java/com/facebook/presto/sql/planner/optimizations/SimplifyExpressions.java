@@ -141,7 +141,8 @@ public class SimplifyExpressions
                     node.getAssignments(),
                     node.getLayout(),
                     node.getCurrentConstraint(),
-                    originalConstraint);
+                    originalConstraint,
+                    node.getNestedFields());
         }
 
         private Expression simplifyExpression(Expression expression)
