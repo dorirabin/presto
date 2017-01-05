@@ -100,7 +100,8 @@ public class HivePageSourceProvider
                 hiveSplit.getPartitionKeys(),
                 hiveStorageTimeZone,
                 typeManager,
-                hiveSplit.getColumnCoercions());
+                hiveSplit.getColumnCoercions(),
+                hiveSplit.getNestedTupleDomain());
         if (pageSource.isPresent()) {
             return pageSource.get();
         }
@@ -123,7 +124,8 @@ public class HivePageSourceProvider
             List<HivePartitionKey> partitionKeys,
             DateTimeZone hiveStorageTimeZone,
             TypeManager typeManager,
-            Map<Integer, HiveType> columnCoercions)
+            Map<Integer, HiveType> columnCoercions,
+            Optional<TupleDomain<List<String>>> nestedTupleDomain)
     {
         List<ColumnMapping> columnMappings = ColumnMapping.buildColumnMappings(partitionKeys, hiveColumns, columnCoercions, path, bucketNumber);
         List<ColumnMapping> regularColumnMappings = ColumnMapping.extractRegularColumnMappings(columnMappings);
@@ -138,7 +140,8 @@ public class HivePageSourceProvider
                     schema,
                     extractRegularColumnHandles(regularColumnMappings, true),
                     effectivePredicate,
-                    hiveStorageTimeZone
+                    hiveStorageTimeZone,
+                    nestedTupleDomain
             );
             if (pageSource.isPresent()) {
                 return Optional.of(
@@ -165,7 +168,8 @@ public class HivePageSourceProvider
                     extractRegularColumnHandles(regularColumnMappings, doCoercion),
                     effectivePredicate,
                     hiveStorageTimeZone,
-                    typeManager);
+                    typeManager,
+                    nestedTupleDomain);
 
             if (cursor.isPresent()) {
                 RecordCursor delegate = cursor.get();

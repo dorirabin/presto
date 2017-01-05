@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableMap;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Properties;
 
@@ -47,6 +48,7 @@ public class HiveSplit
     private final OptionalInt bucketNumber;
     private final boolean forceLocalScheduling;
     private final Map<Integer, HiveType> columnCoercions;
+    private final Optional<TupleDomain<List<String>>> nestedTupleDomain;
 
     @JsonCreator
     public HiveSplit(
@@ -63,7 +65,8 @@ public class HiveSplit
             @JsonProperty("bucketNumber") OptionalInt bucketNumber,
             @JsonProperty("forceLocalScheduling") boolean forceLocalScheduling,
             @JsonProperty("effectivePredicate") TupleDomain<HiveColumnHandle> effectivePredicate,
-            @JsonProperty("columnCoercions") Map<Integer, HiveType> columnCoercions)
+            @JsonProperty("columnCoercions") Map<Integer, HiveType> columnCoercions,
+            @JsonProperty("nestedTupleDomain") Optional<TupleDomain<List<String>>> nestedTupleDomain)
     {
         requireNonNull(clientId, "clientId is null");
         checkArgument(start >= 0, "start must be positive");
@@ -93,6 +96,7 @@ public class HiveSplit
         this.forceLocalScheduling = forceLocalScheduling;
         this.effectivePredicate = effectivePredicate;
         this.columnCoercions = columnCoercions;
+        this.nestedTupleDomain = nestedTupleDomain;
     }
 
     @JsonProperty
@@ -180,6 +184,12 @@ public class HiveSplit
         return columnCoercions;
     }
 
+    @JsonProperty
+    public Optional<TupleDomain<List<String>>> getNestedTupleDomain()
+    {
+        return nestedTupleDomain;
+    }
+
     @Override
     public boolean isRemotelyAccessible()
     {
@@ -198,6 +208,7 @@ public class HiveSplit
                 .put("table", table)
                 .put("forceLocalScheduling", forceLocalScheduling)
                 .put("partitionName", partitionName)
+                .put("nestedTupleDomain", nestedTupleDomain)
                 .build();
     }
 
@@ -209,6 +220,7 @@ public class HiveSplit
                 .addValue(start)
                 .addValue(length)
                 .addValue(effectivePredicate)
+                .addValue(nestedTupleDomain)
                 .toString();
     }
 }

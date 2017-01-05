@@ -468,7 +468,8 @@ public class TestOrcPageSourceMemoryTracking
                     partitionKeys,
                     DateTimeZone.UTC,
                     TYPE_MANAGER,
-                    ImmutableMap.of())
+                    ImmutableMap.of(),
+                    Optional.empty())
                     .get();
         }
 

@@ -107,6 +107,7 @@ public class BackgroundHiveSplitLoader
     private final ConcurrentLazyQueue<HivePartitionMetadata> partitions;
     private final Deque<HiveFileIterator> fileIterators = new ConcurrentLinkedDeque<>();
     private final AtomicInteger remainingInitialSplits;
+    private final Optional<TupleDomain<List<String>>> nestedTupleDomain;
 
     // Purpose of this lock:
     // * When write lock is acquired, except the holder, no one can do any of the following:
@@ -137,7 +138,8 @@ public class BackgroundHiveSplitLoader
             Executor executor,
             int maxPartitionBatchSize,
             int maxInitialSplits,
-            boolean recursiveDirWalkerEnabled)
+            boolean recursiveDirWalkerEnabled,
+            Optional<TupleDomain<List<String>>> nestedTupleDomain)
     {
         this.connectorId = connectorId;
         this.table = table;
@@ -152,6 +154,7 @@ public class BackgroundHiveSplitLoader
         this.maxInitialSplitSize = getMaxInitialSplitSize(session);
         this.remainingInitialSplits = new AtomicInteger(maxInitialSplits);
         this.recursiveDirWalkerEnabled = recursiveDirWalkerEnabled;
+        this.nestedTupleDomain = nestedTupleDomain;
         this.executor = executor;
         this.partitions = new ConcurrentLazyQueue<>(partitions);
     }
@@ -555,7 +558,8 @@ public class BackgroundHiveSplitLoader
                             bucketNumber,
                             forceLocalScheduling && hasRealAddress(addresses),
                             effectivePredicate,
-                            columnCoercions);
+                            columnCoercions,
+                            nestedTupleDomain);
 
                     chunkOffset += chunkLength;
 
@@ -590,7 +594,8 @@ public class BackgroundHiveSplitLoader
                     bucketNumber,
                     forceLocalScheduling && hasRealAddress(addresses),
                     effectivePredicate,
-                    columnCoercions));
+                    columnCoercions,
+                    nestedTupleDomain));
         }
     }
 

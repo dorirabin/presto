@@ -102,6 +102,7 @@ import static parquet.schema.OriginalType.MAP_KEY_VALUE;
 public class ParquetHiveRecordCursor
         implements RecordCursor
 {
+    private final Optional<TupleDomain<List<String>>> nestedTupleDomain;
     private final ParquetRecordReader<FakeParquetRecord> recordReader;
 
     private final Type[] types;
@@ -129,7 +130,8 @@ public class ParquetHiveRecordCursor
             boolean useParquetColumnNames,
             TypeManager typeManager,
             boolean predicatePushdownEnabled,
-            TupleDomain<HiveColumnHandle> effectivePredicate)
+            TupleDomain<HiveColumnHandle> effectivePredicate,
+            Optional<TupleDomain<List<String>>> nestedTupleDomain)
     {
         requireNonNull(path, "path is null");
         checkArgument(length >= 0, "length is negative");
@@ -156,6 +158,7 @@ public class ParquetHiveRecordCursor
             types[columnIndex] = typeManager.getType(column.getTypeSignature());
         }
 
+        this.nestedTupleDomain = nestedTupleDomain;
         this.recordReader = createParquetRecordReader(
                 hdfsEnvironment,
                 sessionUser,

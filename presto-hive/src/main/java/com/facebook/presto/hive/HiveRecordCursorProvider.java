@@ -38,5 +38,6 @@ public interface HiveRecordCursorProvider
             List<HiveColumnHandle> columns,
             TupleDomain<HiveColumnHandle> effectivePredicate,
             DateTimeZone hiveStorageTimeZone,
-            TypeManager typeManager);
+            TypeManager typeManager,
+            Optional<TupleDomain<List<String>>> nestedTupleDomain);
 }

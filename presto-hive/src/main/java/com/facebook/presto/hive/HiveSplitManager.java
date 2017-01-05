@@ -174,7 +174,8 @@ public class HiveSplitManager
                 executor,
                 maxPartitionBatchSize,
                 maxInitialSplits,
-                recursiveDfsWalkerEnabled);
+                recursiveDfsWalkerEnabled,
+                layout.getNestedTupleDomain());
 
         HiveSplitSource splitSource = new HiveSplitSource(maxOutstandingSplits, hiveSplitLoader, executor);
         hiveSplitLoader.start(splitSource);

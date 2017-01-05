@@ -97,7 +97,8 @@ public class ParquetPageSourceFactory
             Properties schema,
             List<HiveColumnHandle> columns,
             TupleDomain<HiveColumnHandle> effectivePredicate,
-            DateTimeZone hiveStorageTimeZone)
+            DateTimeZone hiveStorageTimeZone,
+            Optional<TupleDomain<List<String>>> nestedTupleDomain)
     {
         if (!isParquetOptimizedReaderEnabled(session)) {
             return Optional.empty();
@@ -119,7 +120,8 @@ public class ParquetPageSourceFactory
                 useParquetColumnNames,
                 typeManager,
                 isParquetPredicatePushdownEnabled(session),
-                effectivePredicate));
+                effectivePredicate,
+                nestedTupleDomain));
     }
 
     public static ParquetPageSource createParquetPageSource(
@@ -134,7 +136,8 @@ public class ParquetPageSourceFactory
             boolean useParquetColumnNames,
             TypeManager typeManager,
             boolean predicatePushdownEnabled,
-            TupleDomain<HiveColumnHandle> effectivePredicate)
+            TupleDomain<HiveColumnHandle> effectivePredicate,
+            Optional<TupleDomain<List<String>>> nestedTupleDomain)
     {
         AggregatedMemoryContext systemMemoryContext = new AggregatedMemoryContext();
 

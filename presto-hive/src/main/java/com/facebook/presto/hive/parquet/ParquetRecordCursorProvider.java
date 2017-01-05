@@ -72,7 +72,8 @@ public class ParquetRecordCursorProvider
             List<HiveColumnHandle> columns,
             TupleDomain<HiveColumnHandle> effectivePredicate,
             DateTimeZone hiveStorageTimeZone,
-            TypeManager typeManager)
+            TypeManager typeManager,
+            Optional<TupleDomain<List<String>>> nestedTupleDomain)
     {
         if (!PARQUET_SERDE_CLASS_NAMES.contains(getDeserializerClassName(schema))) {
             return Optional.empty();
@@ -90,7 +91,8 @@ public class ParquetRecordCursorProvider
                 useParquetColumnNames,
                 typeManager,
                 isParquetPredicatePushdownEnabled(session),
-                effectivePredicate
+                effectivePredicate,
+                nestedTupleDomain
         ));
     }
 }
