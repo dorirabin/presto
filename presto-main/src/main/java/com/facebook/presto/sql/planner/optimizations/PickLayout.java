@@ -120,7 +120,8 @@ public class PickLayout
             List<TableLayoutResult> layouts = metadata.getLayouts(
                     session, node.getTable(),
                     new Constraint<>(simplifiedConstraint, bindings -> true),
-                    Optional.of(ImmutableSet.copyOf(node.getAssignments().values())));
+                    Optional.of(ImmutableSet.copyOf(node.getAssignments().values())),
+                    decomposedPredicate.getNestedTupleDomain());
 
             if (layouts.isEmpty()) {
                 return new ValuesNode(idAllocator.getNextId(), node.getOutputSymbols(), ImmutableList.of());

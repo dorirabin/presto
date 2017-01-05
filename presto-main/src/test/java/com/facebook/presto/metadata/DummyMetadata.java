@@ -97,7 +97,8 @@ public class DummyMetadata
             Session session,
             TableHandle tableHandle,
             Constraint<ColumnHandle> constraint,
-            Optional<Set<ColumnHandle>> desiredColumns)
+            Optional<Set<ColumnHandle>> desiredColumns,
+            Optional<TupleDomain<List<String>>> nestedTupleDomain)
     {
         throw new UnsupportedOperationException();
     }

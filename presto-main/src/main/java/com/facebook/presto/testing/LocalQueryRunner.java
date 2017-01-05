@@ -748,7 +748,7 @@ public class LocalQueryRunner
         List<Type> columnTypes = columnTypesBuilder.build();
 
         // get the split for this table
-        List<TableLayoutResult> layouts = metadata.getLayouts(session, tableHandle, Constraint.alwaysTrue(), Optional.empty());
+        List<TableLayoutResult> layouts = metadata.getLayouts(session, tableHandle, Constraint.alwaysTrue(), Optional.empty(), Optional.empty());
         Split split = getLocalQuerySplit(session, layouts.get(0).getLayout().getHandle());
 
         return new OperatorFactory()

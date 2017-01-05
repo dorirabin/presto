@@ -268,7 +268,7 @@ public class InformationSchemaPageSourceProvider
             throw new TableNotFoundException(tableName.asSchemaTableName());
         }
 
-        List<TableLayoutResult> layouts = metadata.getLayouts(session, tableHandle.get(), Constraint.alwaysTrue(), Optional.empty());
+        List<TableLayoutResult> layouts = metadata.getLayouts(session, tableHandle.get(), Constraint.alwaysTrue(), Optional.empty(), Optional.empty());
 
         if (layouts.size() == 1) {
             Map<ColumnHandle, String> columnHandles = ImmutableBiMap.copyOf(metadata.getColumnHandles(session, tableHandle.get())).inverse();

@@ -140,7 +140,7 @@ public class TestRaptorSplitManager
     public void testSanity()
             throws InterruptedException
     {
-        List<ConnectorTableLayoutResult> layouts = metadata.getTableLayouts(SESSION, tableHandle, Constraint.alwaysTrue(), Optional.empty());
+        List<ConnectorTableLayoutResult> layouts = metadata.getTableLayouts(SESSION, tableHandle, Constraint.alwaysTrue(), Optional.empty(), Optional.empty());
         assertEquals(layouts.size(), 1);
         ConnectorTableLayoutResult layout = getOnlyElement(layouts);
         assertInstanceOf(layout.getTableLayout().getHandle(), RaptorTableLayoutHandle.class);
@@ -159,7 +159,7 @@ public class TestRaptorSplitManager
     {
         deleteShardNodes();
 
-        ConnectorTableLayoutResult layout = getOnlyElement(metadata.getTableLayouts(SESSION, tableHandle, Constraint.alwaysTrue(), Optional.empty()));
+        ConnectorTableLayoutResult layout = getOnlyElement(metadata.getTableLayouts(SESSION, tableHandle, Constraint.alwaysTrue(), Optional.empty(), Optional.empty()));
         ConnectorSplitSource splitSource = getSplits(raptorSplitManager, layout);
         getFutureValue(splitSource.getNextBatch(1000));
     }
@@ -177,7 +177,7 @@ public class TestRaptorSplitManager
 
         deleteShardNodes();
 
-        ConnectorTableLayoutResult layout = getOnlyElement(metadata.getTableLayouts(SESSION, tableHandle, Constraint.alwaysTrue(), Optional.empty()));
+        ConnectorTableLayoutResult layout = getOnlyElement(metadata.getTableLayouts(SESSION, tableHandle, Constraint.alwaysTrue(), Optional.empty(), Optional.empty()));
         ConnectorSplitSource partitionSplit = getSplits(raptorSplitManagerWithBackup, layout);
         List<ConnectorSplit> batch = getFutureValue(partitionSplit.getNextBatch(1), PrestoException.class);
         assertEquals(getOnlyElement(getOnlyElement(batch).getAddresses()), node.getHostAndPort());
@@ -190,7 +190,7 @@ public class TestRaptorSplitManager
         deleteShardNodes();
 
         RaptorSplitManager raptorSplitManagerWithBackup = new RaptorSplitManager(new RaptorConnectorId("fbraptor"), ImmutableSet::of, shardManager, true);
-        ConnectorTableLayoutResult layout = getOnlyElement(metadata.getTableLayouts(SESSION, tableHandle, Constraint.alwaysTrue(), Optional.empty()));
+        ConnectorTableLayoutResult layout = getOnlyElement(metadata.getTableLayouts(SESSION, tableHandle, Constraint.alwaysTrue(), Optional.empty(), Optional.empty()));
         ConnectorSplitSource splitSource = getSplits(raptorSplitManagerWithBackup, layout);
         getFutureValue(splitSource.getNextBatch(1000), PrestoException.class);
     }

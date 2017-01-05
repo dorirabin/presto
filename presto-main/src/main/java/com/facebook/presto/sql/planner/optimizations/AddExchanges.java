@@ -591,7 +591,8 @@ public class AddExchanges
                     new Constraint<>(simplifiedConstraint, bindings -> !shouldPrune(constraint, node.getAssignments(), bindings, context.getCorrelations())),
                     Optional.of(node.getOutputSymbols().stream()
                             .map(node.getAssignments()::get)
-                            .collect(toImmutableSet())));
+                            .collect(toImmutableSet())),
+                    decomposedPredicate.getNestedTupleDomain());
 
             if (layouts.isEmpty()) {
                 return new PlanWithProperties(

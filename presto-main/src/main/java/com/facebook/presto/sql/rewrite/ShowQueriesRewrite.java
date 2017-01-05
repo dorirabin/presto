@@ -362,7 +362,7 @@ final class ShowQueriesRewrite
                 throw new SemanticException(MISSING_TABLE, showPartitions, "Table '%s' does not exist", table);
             }
 
-            List<TableLayoutResult> layouts = metadata.getLayouts(session, tableHandle.get(), Constraint.alwaysTrue(), Optional.empty());
+            List<TableLayoutResult> layouts = metadata.getLayouts(session, tableHandle.get(), Constraint.alwaysTrue(), Optional.empty(), Optional.empty());
             if (layouts.size() != 1) {
                 throw new SemanticException(NOT_SUPPORTED, showPartitions, "Table does not have exactly one layout: %s", table);
             }
