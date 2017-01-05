@@ -41,7 +41,9 @@ import parquet.schema.MessageType;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -51,6 +53,9 @@ import static com.facebook.presto.hive.parquet.ParquetTypeUtils.getDescriptor;
 import static com.facebook.presto.hive.parquet.ParquetTypeUtils.getParquetEncoding;
 import static com.facebook.presto.spi.type.IntegerType.INTEGER;
 import static com.facebook.presto.spi.type.SmallintType.SMALLINT;
+import static com.facebook.presto.spi.type.StandardTypes.ARRAY;
+import static com.facebook.presto.spi.type.StandardTypes.MAP;
+import static com.facebook.presto.spi.type.StandardTypes.ROW;
 import static com.facebook.presto.spi.type.TinyintType.TINYINT;
 import static com.google.common.base.Verify.verify;
 import static io.airlift.slice.Slices.wrappedBuffer;
@@ -75,20 +80,40 @@ public final class ParquetPredicateUtils
                 (type.equals(INTEGER) && (min < Integer.MIN_VALUE || max > Integer.MAX_VALUE));
     }
 
-    public static TupleDomain<ColumnDescriptor> getParquetTupleDomain(MessageType fileSchema, MessageType requestedSchema, TupleDomain<HiveColumnHandle> effectivePredicate)
+    public static TupleDomain<ColumnDescriptor> getParquetTupleDomain(MessageType fileSchema, MessageType requestedSchema, TupleDomain<HiveColumnHandle> effectivePredicate, Optional<TupleDomain<List<String>>> nestedTupleDomain)
     {
-        if (effectivePredicate.isNone()) {
-            return TupleDomain.none();
+        TupleDomain<ColumnDescriptor> result = TupleDomain.none();
+        if (!effectivePredicate.isNone()) {
+            ImmutableMap.Builder<ColumnDescriptor, Domain> flatPredicateBuilder = ImmutableMap.builder();
+            for (Map.Entry<HiveColumnHandle, Domain> entry : effectivePredicate.getDomains().get().entrySet()) {
+                String typeBase = entry.getKey().getTypeSignature().getBase();
+                if (typeBase.equals(ROW) || typeBase.equals(ARRAY) || typeBase.equals(MAP)) {
+                    continue;
+                }
+                List<String> path = new ArrayList<>();
+                path.add(entry.getKey().getName());
+                Optional<RichColumnDescriptor> descriptor = getDescriptor(fileSchema, requestedSchema, path);
+                if (descriptor.isPresent()) {
+                    flatPredicateBuilder.put(descriptor.get(), entry.getValue());
+                }
+            }
+            result = TupleDomain.withColumnDomains(flatPredicateBuilder.build());
         }
 
-        ImmutableMap.Builder<ColumnDescriptor, Domain> predicate = ImmutableMap.builder();
-        for (Entry<HiveColumnHandle, Domain> entry : effectivePredicate.getDomains().get().entrySet()) {
-            Optional<RichColumnDescriptor> descriptor = getDescriptor(fileSchema, requestedSchema, ImmutableList.of(entry.getKey().getName()));
-            if (descriptor.isPresent()) {
-                predicate.put(descriptor.get(), entry.getValue());
+        if (nestedTupleDomain.isPresent()) {
+            Optional<Map<List<String>, Domain>> domains = nestedTupleDomain.get().getDomains();
+            if (domains.isPresent()) {
+                ImmutableMap.Builder<ColumnDescriptor, Domain> nestedPredicateBuilder = ImmutableMap.builder();
+                for (Map.Entry<List<String>, Domain> entry : domains.get().entrySet()) {
+                    Optional<RichColumnDescriptor> descriptor = getDescriptor(fileSchema, requestedSchema, entry.getKey());
+                    if (descriptor.isPresent()) {
+                        nestedPredicateBuilder.put(descriptor.get(), entry.getValue());
+                    }
+                }
+                return result.intersect(TupleDomain.withColumnDomains(nestedPredicateBuilder.build()));
             }
         }
-        return TupleDomain.withColumnDomains(predicate.build());
+        return result;
     }
 
     public static ParquetPredicate buildParquetPredicate(MessageType requestedSchema, TupleDomain<ColumnDescriptor> parquetTupleDomain, MessageType fileSchema)
